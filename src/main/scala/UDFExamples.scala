@@ -80,16 +80,31 @@ object UDFExamples {
           .drop("DateTime")
 
 
-          import spark.implicits._
-        val len = impData.count().toInt
-          val DFtoArray = impData.take(len)
-            .map(_.toSeq)
-            .map(_.toArray)
+    def getColumnToArray(DF:DataFrame,column:String): Array[Any] ={
+      import spark.implicits._
+      DF.select(column).take(DF.count().toInt)
+        .map(_.toSeq)
+        .map(_.toArray)
+        .flatMap(record => record.toSeq)
+        .toArray
+    }
 
-                val flattenArray = DFtoArray
-                  .flatMap(record => record.toSeq)
-                    .toArray
-          println(flattenArray.mkString(" "))
+
+    println(getColumnToArray(impData,"ID").mkString("\n"))
+
+
+
+
+//          import spark.implicits._
+//        val len = impData.count().toInt
+//          val DFtoArray = impData.take(len)
+//            .map(_.toSeq)
+//            .map(_.toArray)
+//
+//                val flattenArray = DFtoArray
+//                  .flatMap(record => record.toSeq)
+//                    .toArray
+//          println(flattenArray.mkString(" "))
 
 //        def calculateIdleTime =
 
