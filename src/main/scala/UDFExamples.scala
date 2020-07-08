@@ -1,87 +1,83 @@
 //UDFExamples
-import java.io.{File, FileWriter}
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-import java.util.Properties
 
-import org.apache.spark.sql
-import org.apache.spark.sql.functions.{col, from_json, _}
-import org.apache.spark.sql.streaming.DataStreamReader
-import org.apache.spark.sql.types.{DataTypes, StructType, _}
-import org.apache.spark.sql.{DataFrame, Dataset, SaveMode, SparkSession}
+import org.apache.spark.sql.functions.col
+import org.apache.spark.sql.types.{StructType, _}
+import org.apache.spark.sql.{DataFrame, SparkSession}
 
-import org.apache.spark.sql.functions.udf
+import scala.collection.mutable.ListBuffer
 
+case class WorkData(ID: String, Idle: Int)
+
+case class UserTime(ID: String, time: Int)
 
 object UDFExamples {
   def main(args: Array[String]): Unit = {
-//    try {
-      val spark = SparkSession.builder()
-        .appName("Exercise")
-        .master("local[*]")
-        .getOrCreate()
+    //    try {
+    val spark = SparkSession.builder()
+      .appName("Exercise")
+      .master("local[*]")
+      .getOrCreate()
 
-//      val firstDF = spark.read
-//        .format("json")
-//        .option("inferSchema","true")
-//        .load("src/main/resources/data/cars.json")
-
-
-//      firstDF.show()
-
-//      firstDF.printSchema()
-
-//      val data = firstDF.take(10).foreach(println(_))
-
-//      val data = firstDF.take(10).flatMap(_.toSeq)
-//        println(data.mkString(" "))
-
-//      import spark.implicits._
-//      val DFtoSeq = firstDF.take(10).map(_.toSeq)
-//      DFtoSeq.foreach(println(_))
-
-//      import spark.implicits._
-//      val DFtoArray = firstDF.take(10)
-//        .map(_.toSeq)
-//        .map(_.toArray)
-//
-//      DFtoArray.foreach{
-//        record => val arr = record.toArray
-//          println(arr.mkString(" "))
-//      }
-
-//      val flattenArray = DFtoArray.flatMap(record => record.toSeq)
-//      flattenArray.foreach(println(_))
-
-//            val flattenArray = DFtoArray
-//              .flatMap(record => record.toSeq)
-//                .toArray
-//      println(flattenArray.mkString(" "))
+    //      val firstDF = spark.read
+    //        .format("json")
+    //        .option("inferSchema","true")
+    //        .load("src/main/resources/data/cars.json")
 
 
-      val tablename = "work"
-      val sc = spark.sparkContext
-      val logDfSchema = getDfSchema()
-      val dir = "src\\resources\\"
-      val path = dir + "userWorkData.csv"
-      val prePath = "src/main/resources/day ("
-      val postPath = ").csv"
+    //      firstDF.show()
 
-      val userData = getDfFromCsv(prePath + "2" + postPath, spark, logDfSchema)
+    //      firstDF.printSchema()
 
-//      userData.show()
+    //      val data = firstDF.take(10).foreach(println(_))
 
-      val impData = userData.select("User_Name","DateTime","Keyboard","Mouse")
-        .withColumn("Action",(col("Keyboard") + col("Mouse") ).cast("Integer"))
-          .drop("Keyboard")
-          .drop("Mouse")
-          .withColumnRenamed("User_Name","ID")
-        .orderBy("ID","DateTime")
-          .drop("DateTime")
+    //      val data = firstDF.take(10).flatMap(_.toSeq)
+    //        println(data.mkString(" "))
+
+    //      import spark.implicits._
+    //      val DFtoSeq = firstDF.take(10).map(_.toSeq)
+    //      DFtoSeq.foreach(println(_))
+
+    //      import spark.implicits._
+    //      val DFtoArray = firstDF.take(10)
+    //        .map(_.toSeq)
+    //        .map(_.toArray)
+    //
+    //      DFtoArray.foreach{
+    //        record => val arr = record.toArray
+    //          println(arr.mkString(" "))
+    //      }
+
+    //      val flattenArray = DFtoArray.flatMap(record => record.toSeq)
+    //      flattenArray.foreach(println(_))
+
+    //            val flattenArray = DFtoArray
+    //              .flatMap(record => record.toSeq)
+    //                .toArray
+    //      println(flattenArray.mkString(" "))
 
 
-    def getColumnToArray(DF:DataFrame,column:String): Array[Any] ={
-      import spark.implicits._
+    val tablename = "work"
+    val sc = spark.sparkContext
+    val logDfSchema = getDfSchema()
+    val dir = "src\\resources\\"
+    val path = dir + "userWorkData.csv"
+    val prePath = "src/main/resources/day ("
+    val postPath = ").csv"
+
+    val userData = getDfFromCsv(prePath + "2" + postPath, spark, logDfSchema)
+
+    //      userData.show()
+
+    val impData = userData.select("User_Name", "DateTime", "Keyboard", "Mouse")
+      .withColumn("Action", (col("Keyboard") + col("Mouse")).cast("Integer"))
+      .drop("Keyboard")
+      .drop("Mouse")
+      .withColumnRenamed("User_Name", "ID")
+      .orderBy("ID", "DateTime")
+      .drop("DateTime")
+
+
+    def getColumnToArray(DF: DataFrame, column: String): Array[Any] = {
       DF.select(column).take(DF.count().toInt)
         .map(_.toSeq)
         .map(_.toArray)
@@ -90,33 +86,141 @@ object UDFExamples {
     }
 
 
-    println(getColumnToArray(impData,"ID").mkString("\n"))
+    val userIds = getColumnToArray(impData, "ID").map(_.toString);
+    val userStauts = getColumnToArray(impData, "Action").map(record => record.toString.toInt)
 
 
-
-
-//          import spark.implicits._
-//        val len = impData.count().toInt
-//          val DFtoArray = impData.take(len)
-//            .map(_.toSeq)
-//            .map(_.toArray)
-//
-//                val flattenArray = DFtoArray
-//                  .flatMap(record => record.toSeq)
-//                    .toArray
-//          println(flattenArray.mkString(" "))
-
-//        def calculateIdleTime =
-
-
-
-
-
-//    } catch {
-//      case exception => println(exception)
-//      case exception1:ClassNotFoundException => println(exception1)
-//      case exception2:sql.AnalysisException => println(exception2)
+//    for (i <- 0 until (userIds.length)) {
+//      println(userIds(i) + " " + userStauts(i))
 //    }
+
+
+    def getWorkData(ids: Array[String], staus: Array[Int]): Any /*Array[WorkData]*/ = {
+      var workrecord = new ListBuffer[WorkData]();
+      var totalWorkTime = new ListBuffer[UserTime]();
+      var ID = ""
+      var counter = 0
+      var userWorkCounter = 0
+
+
+      def writeRecord(index: Int): Unit = {
+        if (counter > 5) {
+          workrecord += WorkData(ids(index), counter )
+        }
+      }
+
+      def writeTotalWork(index: Int): Unit = {
+        totalWorkTime += UserTime(ids(index), userWorkCounter * 5)
+      }
+
+
+      for (i <- 0 until (staus.length)) {
+        //First record
+        if (i == 0) {
+          ID = ids(i)
+          if (staus(i) == 0) {
+            counter = 1
+          }
+        //Last record
+        }else if (i + 1 == staus.length - 1) {
+            if (!ID.equals(ids(i))) {
+              writeRecord(i-1)
+              counter =0
+              ID = ids(i)
+              writeTotalWork(i-1)
+              userWorkCounter = 1
+              if(staus(i) == 0){counter = 1}
+              writeRecord(i)
+              writeTotalWork(i)
+            } else {
+              if (staus(i) == 0) {
+                counter += 1
+              }
+              writeRecord(i)
+              userWorkCounter +=1
+              writeTotalWork(i)
+            }
+          }
+
+         else {
+          if (!ID.equals(ids(i))) {
+            writeRecord(i-1)
+            writeTotalWork(i-1)
+            userWorkCounter = 0
+            ID = ids(i)
+            if (staus(i) == 0) {
+              counter = 1
+            } else {
+              counter = 0
+            }
+          } else {
+            if (staus(i) != 0) {
+              writeRecord(i)
+              counter = 0
+            } else {
+              counter += 1
+            }
+          }
+        }
+        userWorkCounter += 1
+      }
+
+      workrecord.foreach(println(_))
+
+
+    }
+
+    val carSchema = StructType(
+      Array(
+        StructField("Name",StringType),
+        StructField("Miles_per_Gallon",DoubleType),
+        StructField("Cylinders",DoubleType),
+        StructField("Displacement",DoubleType),
+        StructField("Horsepower",DoubleType),
+        StructField("Weight_in_lbs",DoubleType),
+        StructField("Acceleration",DoubleType),
+        StructField("Year",DateType),
+        StructField("Origin",StringType),
+      )
+    )
+
+    val jsonDF = spark.read
+      .format("json")
+      .option("DateFomat","YYYY-MM-dd")
+      .schema(carSchema)
+      .option("compression","uncompressed")
+      .option("allowSingleQuetoes","true")
+      .load("src/main/resources/data/cars.json")
+
+
+    jsonDF.show()
+
+   // getWorkData(userIds,userStauts)
+
+
+
+
+
+
+    //          import spark.implicits._
+    //        val len = impData.count().toInt
+    //          val DFtoArray = impData.take(len)
+    //            .map(_.toSeq)
+    //            .map(_.toArray)
+    //
+    //                val flattenArray = DFtoArray
+    //                  .flatMap(record => record.toSeq)
+    //                    .toArray
+    //          println(flattenArray.mkString(" "))
+
+    //        def calculateIdleTime =
+
+
+    //    } catch {
+    //      case exception => println(exception)
+    //      case exception1:ClassNotFoundException => println(exception1)
+    //      case exception2:sql.AnalysisException => println(exception2)
+    //    }
   }
 
   //Function to get all data
