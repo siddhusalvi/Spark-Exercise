@@ -16,9 +16,9 @@ libraryDependencies += "org.apache.kafka" % "kafka-clients" % "0.11.0.1"
 
 libraryDependencies += "mysql" % "mysql-connector-java" % "8.0.20"
 
-libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.0-M2" % Test
+// https://mvnrepository.com/artifact/org.scalatest/scalatest
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.0" % Test
 
-libraryDependencies += "com.novocode" % "junit-interface" % "0.8" % "test->default"
 
 
 
