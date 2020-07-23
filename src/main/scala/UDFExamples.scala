@@ -193,9 +193,28 @@ object UDFExamples {
       .load("src/main/resources/data/cars.json")
 
 
-    jsonDF.show()
+//    jsonDF.show()
 
-   // getWorkData(userIds,userStauts)
+    val stockSchema = StructType(
+      Array(
+        StructField("Symbol",StringType),
+        StructField("Date",DateType),
+        StructField("price",DoubleType)
+      )
+    )
+
+    val stockCSV = spark.read
+      .format("csv")
+      .schema(stockSchema)
+      .option("DateFomat","MM-dd-YYYY")
+      .option("header","true")
+      .option("sep",",")
+      .option("nullValue","")
+      .load("src/main/resource/data/stocks.csv")
+
+    stockCSV.show()
+
+    // getWorkData(userIds,userStauts)
 
 
 
