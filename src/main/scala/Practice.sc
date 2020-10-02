@@ -25,5 +25,5 @@ def concat[T](xs: List[T], ys:List[T]) = xs match {
 
 def reverse[T](xs: List[T]):List[T] = xs match {
   case List() =>xs
-  case y :: ys => reverse(ys) :: List(y)
+  case y :: ys => reverse(ys) ++ List(y)
 }
