@@ -82,6 +82,11 @@ object mergesort{
 
   }
 
+  def conCat[T](xs:List[T],ys:List[T])=xs match {
+    case List() => ys
+    case x::xs1 => x::conCat(xs1,ys)
+  }
+
   /*
   def reduceRight(op:(T,T) => T):T = this match {
     case Nil => throw  Error("Nil.reduceRight")
