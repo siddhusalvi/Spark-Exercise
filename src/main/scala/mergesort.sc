@@ -1,5 +1,13 @@
+import org.json4s.scalap.Error
 
-
+/*
+abstract class List[T]{
+  def filter(p:T=>Boolean):List[T] = this match{
+    case Nil => this
+    case x::xs => if (p(x)) x::xs.filter else xs.filter(p)
+  }
+}
+*/
 object mergesort{
   //Using lt (less than function)
   def msort[T](xs:List[T])(lt:(T,T) => Boolean):List[T] = {
@@ -40,12 +48,47 @@ object mergesort{
 
 
   }
+  //Write function pack that pack consecutive duplicates
+  def pack[T](xs:List[T]):List[List[T]]  = xs match{
+    case Nil => Nil
+    case x::xs =>{
+      val (first,rest) = xs span (y => y == x)
+      first::pack(rest)
+    }
+  }
 
+  //output number of time consecutive same element
+  def encode[T](xs: List[T]):List[(T,Int)] = {
+    pack(xs) map(ys => (ys.head,ys.length))
+  }
+
+  //sum
+  def sum(xs:List[Int]):Int=xs match {
+    case Nil => 0
+    case y::ys => y + sum(ys)
+  }
+
+  //sum and product using foldLeft
+
+  def add(xs:List[Int]) = (xs foldLeft 0)(_ + _)
+  def multiply(xs:List[Int]) = (xs foldLeft 1)(_ * _)
+
+
+  //map like function
   def squareList(xs:List[Int]):List[Int] = xs match {
     case Nil => Nil
     case y::ys=>y * y ::squareList(ys)
+
+
   }
 
+  /*
+  def reduceRight(op:(T,T) => T):T = this match {
+    case Nil => throw  Error("Nil.reduceRight")
+    case x :: Nil => x
+    case x :: xs => op(x,(xs reduceRight z)(op))
+  }
+  */
 
     val nums = List(2,4,-7,1,0)
     msort(nums)((x:Int,y:Int)=> x < y)
@@ -56,5 +99,23 @@ object mergesort{
     msort1(fruits)
 
 
+
+  //filter
+  //filterNot
+  nums filterNot (x => x > 0)
+  //partition
+  nums partition (x => x > 0)
+  //takewhile
+  nums takeWhile  (x => x > 0)
+  //dropWhile
+  nums dropWhile (x => x > 0)
+  //span
+  nums span (x => x > 0)
+
+  val data = List('a','a','a','b','b','c','c')
+
+  pack(data)
+
+  encode(data)
 
 }
