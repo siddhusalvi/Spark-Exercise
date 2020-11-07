@@ -13,8 +13,7 @@ object CommonTypes extends App {
     .json(data + "movies.json")
 
   moviesDF.show()
-
-    //modify and add data to dataframe
+  //modify and add data to dataframe
 
   //adding a plance value
   moviesDF.select(col("Title"),lit(47)as("Plain_value"))

@@ -65,7 +65,6 @@ object Complex_Data_Types extends App{
     expr("Split_Data[0]"),
     size(col("Split_Data")),
     array_contains(col("Split_Data"),"love")
-  )
-    .show()
+  ).show()
 
 }

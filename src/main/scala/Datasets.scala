@@ -16,11 +16,9 @@ object Datasets {
     val numbersDf = spark.read
       .format("csv")
       .option("header","true")
-      .option("inferSchema","true")
       .load(path + "numbers.csv")
 
 //    numbersDf.show()
-
     implicit val encoders =Encoders.scalaInt
 
     val numbersDS:Dataset[Int]=numbersDf.as[Int]
